@@ -1,4 +1,3 @@
-// index.js
 require('dotenv').config();
 const express = require('express');
 const { Pool } = require('pg');
@@ -6,12 +5,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
-
 // Inicializando o app do express
 const app = express();
 const port = 5000;
-
-
 
 // Middleware para lidar com o JSON no corpo da requisição
 app.use(express.json());
@@ -70,6 +66,7 @@ app.post('/api/auth/register', async (req, res) => {
     return res.status(201).json({
       message: 'Usuário registrado com sucesso',
       token,
+      userId: user.id,  // Incluindo o userId no retorno
     });
   } catch (error) {
     console.error('Erro ao registrar usuário:', error);
@@ -106,6 +103,7 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(200).json({
       message: 'Login bem-sucedido',
       token,
+      userId: user.id,  // Incluindo o userId no retorno
     });
   } catch (error) {
     console.error('Erro ao fazer login:', error);
@@ -134,12 +132,16 @@ app.post('/api/favorites', authMiddleware, async (req, res) => {
     }
 
     // Adicionando o favorito
-    await pool.query(
-      'INSERT INTO favorites (user_id, name) VALUES ($1, $2)',
+    const insertResult = await pool.query(
+      'INSERT INTO favorites (user_id, name) VALUES ($1, $2) RETURNING *',
       [userId, name]
     );
 
-    return res.status(201).json({ message: 'Favorito adicionado com sucesso.' });
+    return res.status(201).json({
+      message: 'Favorito adicionado com sucesso.',
+      userId,  // Incluindo o userId no retorno
+      favorite: insertResult.rows[0],  // Retornando o favorito recém-criado
+    });
   } catch (error) {
     console.error('Erro ao adicionar favorito:', error);
     return res.status(500).json({ message: 'Erro ao adicionar favorito.' });
@@ -153,7 +155,10 @@ app.get('/api/favorites', authMiddleware, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM favorites WHERE user_id = $1', [userId]);
 
-    return res.status(200).json(result.rows);
+    return res.status(200).json({
+      userId,  // Incluindo o userId no retorno
+      favorites: result.rows,  // Retornando os favoritos do usuário
+    });
   } catch (error) {
     console.error('Erro ao listar favoritos:', error);
     return res.status(500).json({ message: 'Erro ao listar favoritos.' });
@@ -175,7 +180,11 @@ app.delete('/api/favorites/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({ message: 'Favorito não encontrado.' });
     }
 
-    return res.status(200).json({ message: 'Favorito removido com sucesso.' });
+    return res.status(200).json({
+      message: 'Favorito removido com sucesso.',
+      userId,  // Incluindo o userId no retorno
+      favorite: result.rows[0],  // Retornando o favorito removido
+    });
   } catch (error) {
     console.error('Erro ao remover favorito:', error);
     return res.status(500).json({ message: 'Erro ao remover favorito.' });
