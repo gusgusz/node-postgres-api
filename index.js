@@ -26,17 +26,49 @@ pool.connect()
 
 // Middleware de autenticação JWT
 const authMiddleware = (req, res, next) => {
+  // Pegando o token do cabeçalho Authorization
   const token = req.headers['authorization'];
 
+  // Verificando se o token foi fornecido
   if (!token) {
+    console.error("Token não fornecido");
     return res.status(403).json({ message: 'Token de autenticação não fornecido.' });
   }
 
+  // Verificando se o token tem o prefixo "Bearer"
+  if (!token.startsWith('Bearer ')) {
+    console.error("Token malformado. Esperado 'Bearer <token>'");
+    return res.status(400).json({ message: 'Token malformado. Formato esperado: Bearer <token>' });
+  }
+
+  // Removendo o "Bearer " e deixando só o token
+  const tokenStr = token.split(' ')[1];
+
+  // Verificando se o token é vazio após a remoção do prefixo "Bearer"
+  if (!tokenStr) {
+    console.error("Token vazio após a remoção do prefixo 'Bearer'");
+    return res.status(400).json({ message: 'Token malformado.' });
+  }
+
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decoded.userId; // Atribuindo o userId do token à requisição
+    // Verificando o token usando o segredo
+    const decoded = jwt.verify(tokenStr, process.env.JWT_SECRET);
+    
+    // Log para verificar o payload do token
+    console.log("Token decodificado:", decoded);
+    
+    // Atribuindo o userId do token à requisição
+    req.userId = decoded.userId;
     next();
   } catch (error) {
+    console.error("Erro ao verificar o token:", error);
+
+    // Verificando se o erro foi devido ao token expirado
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Token expirado.' });
+    }
+
+    // Erro genérico de token inválido
     return res.status(401).json({ message: 'Token inválido.' });
   }
 };
