@@ -92,8 +92,7 @@ app.post('/api/auth/register', async (req, res) => {
 
     const user = result.rows[0];
 
-    // Gerando o token JWT
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
 
     return res.status(201).json({
       message: 'Usuário registrado com sucesso',
@@ -130,7 +129,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     // Gerando o token JWT
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
 
     return res.status(200).json({
       message: 'Login bem-sucedido',
