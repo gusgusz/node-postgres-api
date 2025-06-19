@@ -146,9 +146,10 @@ app.post('/api/auth/login', async (req, res) => {
 app.post('/api/favorites', authMiddleware, async (req, res) => {
   const { name } = req.body;
   const userId = req.userId;
+  const { poke_id } req.body;
 
-  if (!name) {
-    return res.status(400).json({ message: 'O nome do favorito é obrigatório.' });
+  if (!name || !poke_id) {
+    return res.status(400).json({ message: 'O nome do pokemon favorito e ID é obrigatório.' });
   }
 
   try {
@@ -164,7 +165,7 @@ app.post('/api/favorites', authMiddleware, async (req, res) => {
 
     // Adicionando o favorito
     const insertResult = await pool.query(
-      'INSERT INTO favorites (user_id, name) VALUES ($1, $2) RETURNING *',
+      'INSERT INTO favorites (user_id, name, poke_id) VALUES ($1, $2) RETURNING *',
       [userId, name]
     );
 
