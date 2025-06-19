@@ -165,8 +165,8 @@ app.post('/api/favorites', authMiddleware, async (req, res) => {
 
     // Adicionando o favorito
     const insertResult = await pool.query(
-      'INSERT INTO favorites (user_id, name, poke_id) VALUES ($1, $2) RETURNING *',
-      [userId, name]
+      'INSERT INTO favorites (user_id, name, poke_id) VALUES ($1, $2, $3) RETURNING *',
+      [userId, name, poke_id]
     );
 
     return res.status(201).json({
