@@ -69,7 +69,7 @@ const authMiddleware = (req, res, next) => {
     }
 
     // Erro genérico de token inválido
-    return res.status(401).json({ message: 'Token inválido.' });
+    return res.status(401).json({ message: error  });
   }
 };
 
