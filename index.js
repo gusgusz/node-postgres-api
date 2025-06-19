@@ -199,12 +199,12 @@ app.get('/api/favorites', authMiddleware, async (req, res) => {
 
 // Função para remover um favorito
 app.delete('/api/favorites/:id', authMiddleware, async (req, res) => {
-  const { id } = req.params;
+  const poke_id  = req.params.id ;
   const userId = req.userId;
 
   try {
     const result = await pool.query(
-      'DELETE FROM favorites WHERE id = $1 AND user_id = $2 RETURNING *',
+      'DELETE FROM favorites WHERE poke_id = $1 AND user_id = $2 RETURNING *',
       [id, userId]
     );
 
