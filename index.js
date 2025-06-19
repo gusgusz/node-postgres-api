@@ -144,9 +144,9 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Função para adicionar um favorito
 app.post('/api/favorites', authMiddleware, async (req, res) => {
-  const { name } = req.body;
+  const { name, poke_id } = req.body;
   const userId = req.userId;
-  const { poke_id } req.body;
+
 
   if (!name || !poke_id) {
     return res.status(400).json({ message: 'O nome do pokemon favorito e ID é obrigatório.' });
