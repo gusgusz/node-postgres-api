@@ -205,7 +205,7 @@ app.delete('/api/favorites/:id', authMiddleware, async (req, res) => {
   try {
     const result = await pool.query(
       'DELETE FROM favorites WHERE poke_id = $1 AND user_id = $2 RETURNING *',
-      [id, userId]
+      [poke_id, userId]
     );
 
     if (result.rows.length === 0) {
